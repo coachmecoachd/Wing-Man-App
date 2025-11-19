@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { getDatingAdvice } from '../services/geminiService.ts';
 import { DatingAdviceResponse } from '../types.ts';
 import { CheckCircle2, XCircle, Shirt, MessageCircle, Smile, HelpCircle, Loader2, Sparkles } from 'lucide-react';
-import ReactMarkdown from 'react-markdown@9';
+import ReactMarkdown from 'react-markdown';
 
 const DatingAdvice: React.FC = () => {
     const [dateType, setDateType] = useState('First Date');

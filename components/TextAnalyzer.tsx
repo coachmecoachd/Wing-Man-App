@@ -1,9 +1,8 @@
 
-
 import React, { useState } from 'react';
 import { Message } from '../types.ts';
 import { getReplySuggestion } from '../services/geminiService.ts';
-import ReactMarkdown from 'react-markdown@9';
+import ReactMarkdown from 'react-markdown';
 
 const TextAnalyzer: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);

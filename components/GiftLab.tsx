@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { PersonProfile } from '../types.ts';
 import { generateGiftIdeas, generateGiftImage } from '../services/geminiService.ts';
-import ReactMarkdown from 'react-markdown@9';
+import ReactMarkdown from 'react-markdown';
 
 const GiftLab: React.FC<{ profiles: PersonProfile[]; userZip?: string }> = ({ profiles, userZip }) => {
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
