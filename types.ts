@@ -48,3 +48,10 @@ export interface DatingAdviceResponse {
   icebreakerJoke: string;
   questionAnswer: string;
 }
+
+export interface DateOption {
+  title: string;
+  location: string;
+  description: string;
+  reasoning: string;
+}

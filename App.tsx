@@ -13,6 +13,7 @@ import DatingAdvice from './components/DatingAdvice.tsx';
 import Interpreter from './components/Interpreter.tsx';
 import Login from './components/Login.tsx';
 import UserSettings from './components/UserSettings.tsx';
+import Tutorial from './components/Tutorial.tsx';
 
 
 const App: React.FC = () => {
@@ -20,10 +21,14 @@ const App: React.FC = () => {
   const [view, setView] = useState<View>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // State to pass a profile from Manager to Planner
+  const [planningProfile, setPlanningProfile] = useState<PersonProfile | null>(null);
+
   // Data is now scoped by user. Keys will change when user logs in/out.
   const profileKey = currentUser ? `${currentUser}-wingman-profiles` : 'anonymous-profiles';
   const dateKey = currentUser ? `${currentUser}-wingman-dates` : 'anonymous-dates';
   const accountKey = currentUser ? `${currentUser}-wingman-account` : 'anonymous-account';
+  const tutorialKey = currentUser ? `${currentUser}-wingman-tutorial-seen` : 'anonymous-tutorial-seen';
 
   const [profiles, setProfiles] = useLocalStorage<PersonProfile[]>(profileKey, []);
   const [dates, setDates] = useLocalStorage<PlannedDate[]>(dateKey, []);
@@ -33,6 +38,8 @@ const App: React.FC = () => {
       avatarUrl: '',
       zipCode: ''
   });
+  const [hasSeenTutorial, setHasSeenTutorial] = useLocalStorage<boolean>(tutorialKey, false);
+
 
   // Sync userAccount username with currentUser on login
   useEffect(() => {
@@ -49,7 +56,18 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
-  const handleLogin = (username: string) => {
+  const handleLogin = (username: string, isNewUser: boolean) => {
+    // Logic to prevent tutorial from showing for returning users.
+    // We manually set the localStorage item *before* the state triggers the hook update.
+    const tutKey = `${username}-wingman-tutorial-seen`;
+    if (!isNewUser) {
+      // If returning user, mark as seen immediately so the tutorial doesn't flash or appear.
+      localStorage.setItem(tutKey, 'true');
+    } else {
+      // If new user, ensure it's false so they see it.
+      localStorage.setItem(tutKey, 'false');
+    }
+    
     setCurrentUser(username);
   };
 
@@ -64,8 +82,20 @@ const App: React.FC = () => {
         localStorage.removeItem(`${currentUser}-wingman-profiles`);
         localStorage.removeItem(`${currentUser}-wingman-dates`);
         localStorage.removeItem(`${currentUser}-wingman-account`);
+        localStorage.removeItem(`${currentUser}-wingman-tutorial-seen`);
+        
+        // Also remove from registry
+        const registry = JSON.parse(localStorage.getItem('wingman-user-registry') || '{}');
+        delete registry[currentUser];
+        localStorage.setItem('wingman-user-registry', JSON.stringify(registry));
+
         handleLogout();
     }
+  };
+
+  const handlePlanDate = (profile: PersonProfile) => {
+      setPlanningProfile(profile);
+      setView('planner');
   };
 
   if (!currentUser) {
@@ -78,11 +108,11 @@ const App: React.FC = () => {
       case 'dashboard':
         return <Dashboard setView={setView} />;
       case 'profiles':
-        return <ProfileManager profiles={profiles} setProfiles={setProfiles} userZip={userAccount.zipCode} />;
+        return <ProfileManager profiles={profiles} setProfiles={setProfiles} userZip={userAccount.zipCode} onPlanDate={handlePlanDate} />;
       case 'texter':
         return <TextAnalyzer />;
       case 'planner':
-        return <DatePlanner dates={dates} setDates={setDates} profiles={profiles} />;
+        return <DatePlanner dates={dates} setDates={setDates} profiles={profiles} initialProfile={planningProfile} onClearInitialProfile={() => setPlanningProfile(null)} />;
       case 'gifts':
         return <GiftLab profiles={profiles} userZip={userAccount.zipCode} />;
       case 'advice':
@@ -90,7 +120,7 @@ const App: React.FC = () => {
       case 'interpreter':
         return <Interpreter />;
       case 'settings':
-        return <UserSettings userAccount={userAccount} onSave={(updated) => { setUserAccount(updated); setView('dashboard'); }} onDeleteAccount={handleDeleteAccount} />;
+        return <UserSettings userAccount={userAccount} onSave={(updated) => { setUserAccount(updated); setView('dashboard'); }} onDeleteAccount={handleDeleteAccount} onReplayTutorial={() => setHasSeenTutorial(false)} />;
       default:
         return <Dashboard setView={setView} />;
     }
@@ -98,6 +128,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-primary font-sans flex text-white">
+      {!hasSeenTutorial && <Tutorial onComplete={() => setHasSeenTutorial(true)} />}
       <Sidebar
         currentView={view}
         setView={setView}

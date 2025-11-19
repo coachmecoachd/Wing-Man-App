@@ -1,6 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { translateText, generateSpeech } from '../services/geminiService.ts';
+import { ArrowRightLeft, Volume2, Loader2 } from 'lucide-react';
 
 // Audio decoding helpers from Gemini documentation
 function decode(base64: string) {
@@ -121,7 +122,7 @@ const Interpreter: React.FC = () => {
                 <h2 className="text-4xl font-extrabold text-white">Travel Interpreter</h2>
                 <p className="mt-2 text-lg text-gray-400 max-w-2xl mx-auto">Break language barriers on the go. Powered by Wing Man.</p>
             </div>
-            <div className="bg-secondary p-6 rounded-lg shadow-lg">
+            <div className="bg-secondary p-6 rounded-xl shadow-lg border border-tertiary/50">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     {/* Input Column */}
                     <div className="flex flex-col gap-4">
@@ -130,7 +131,7 @@ const Interpreter: React.FC = () => {
                             id="source-lang"
                             value={sourceLang}
                             onChange={e => setSourceLang(e.target.value)}
-                            className="w-full bg-tertiary border-tertiary rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-accent"
+                            className="w-full bg-tertiary border-transparent rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent"
                         >
                             {languageList.map(lang => <option key={lang.code} value={lang.code}>{lang.name}</option>)}
                         </select>
@@ -140,7 +141,7 @@ const Interpreter: React.FC = () => {
                             value={inputText}
                             onChange={e => setInputText(e.target.value)}
                             rows={8}
-                            className="w-full bg-tertiary border-tertiary rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-accent"
+                            className="w-full bg-tertiary border-transparent rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent"
                             placeholder="Enter text to translate..."
                         />
                     </div>
@@ -148,10 +149,10 @@ const Interpreter: React.FC = () => {
                     <div className="flex justify-center md:hidden">
                          <button
                             onClick={handleSwapLanguages}
-                            className="p-2 bg-tertiary rounded-full hover:bg-accent"
+                            className="p-3 bg-tertiary rounded-full hover:bg-accent transition-colors"
                             aria-label="Swap languages"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-90" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                            <ArrowRightLeft size={20} className="rotate-90" />
                         </button>
                     </div>
                     {/* Output Column */}
@@ -161,22 +162,31 @@ const Interpreter: React.FC = () => {
                             id="target-lang"
                             value={targetLang}
                             onChange={e => setTargetLang(e.target.value)}
-                            className="w-full bg-tertiary border-tertiary rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-accent"
+                            className="w-full bg-tertiary border-transparent rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent"
                         >
                             {languageList.map(lang => <option key={lang.code} value={lang.code}>{lang.name}</option>)}
                         </select>
-                        <div className="w-full h-full bg-primary rounded-md p-3 min-h-[10rem] text-gray-300 relative">
-                            {isTranslating ? 'Translating...' : translatedText}
+                        <div className="w-full h-full bg-primary/50 border border-tertiary/30 rounded-lg p-3 min-h-[12rem] text-gray-300 relative">
+                            {isTranslating ? (
+                                <div className="flex items-center justify-center h-full text-accent gap-2">
+                                    <Loader2 className="animate-spin" /> Translating...
+                                </div>
+                            ) : translatedText ? (
+                                translatedText
+                            ) : (
+                                <span className="text-gray-600 italic">Translation will appear here...</span>
+                            )}
+                            
                             {translatedText && !isTranslating && (
                                 <button 
                                     onClick={handlePlayAudio}
                                     disabled={isGeneratingAudio}
-                                    className="absolute bottom-2 right-2 bg-accent p-2 rounded-full hover:bg-red-700 disabled:bg-gray-500"
+                                    className="absolute bottom-3 right-3 bg-accent p-2.5 rounded-full hover:bg-red-600 disabled:bg-gray-600 transition-colors shadow-lg"
                                     aria-label="Play audio"
                                 >
                                     {isGeneratingAudio 
-                                        ? <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                        : <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" /></svg>
+                                        ? <Loader2 size={20} className="animate-spin text-white" />
+                                        : <Volume2 size={20} className="text-white" />
                                     }
                                 </button>
                             )}
@@ -184,20 +194,18 @@ const Interpreter: React.FC = () => {
                     </div>
                 </div>
                 {/* Actions */}
-                <div className="flex justify-center items-center gap-4 mt-6">
+                <div className="flex justify-center items-center gap-6 mt-8">
                      <button
                         onClick={handleSwapLanguages}
-                        className="p-2 bg-tertiary rounded-full hover:bg-accent hidden md:block"
+                        className="p-3 bg-tertiary rounded-full hover:bg-accent hidden md:block transition-colors"
                         aria-label="Swap languages"
                     >
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
+                         <ArrowRightLeft size={24} />
                     </button>
                     <button
                         onClick={handleTranslate}
                         disabled={isTranslating || !inputText.trim()}
-                        className="w-full sm:w-auto bg-accent text-white px-8 py-3 rounded-md hover:bg-red-700 disabled:bg-gray-500 font-bold text-lg"
+                        className="w-full sm:w-auto bg-accent text-white px-10 py-3.5 rounded-lg hover:bg-red-600 disabled:bg-gray-600 font-bold text-lg shadow-lg transition-all transform active:scale-95"
                     >
                         {isTranslating ? 'Translating...' : 'Translate'}
                     </button>

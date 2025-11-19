@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Modality, Type } from "@google/genai";
-import { PersonProfile, Message, DatingAdviceResponse } from '../types.ts';
+import { PersonProfile, Message, DatingAdviceResponse, DateOption } from '../types.ts';
 
 let ai: GoogleGenAI | null = null;
 
@@ -70,6 +70,73 @@ export const generateDateIdeas = async (profile: PersonProfile, userZip?: string
         throw new Error("Failed to generate date ideas.");
     }
 };
+
+export const generateStructuredDateIdeas = async (
+    zipCode: string, 
+    dateTime: string, 
+    profile?: PersonProfile
+): Promise<DateOption[]> => {
+    try {
+        const gemini = getAiClient();
+        
+        let profileContext = "";
+        if (profile) {
+            profileContext = `
+            The date is with: ${profile.name}.
+            Their Profile:
+            - Description: ${profile.description}
+            - Likes: ${profile.likes}
+            - Dislikes: ${profile.dislikes}
+            - Hobbies: ${profile.hobbies}
+            `;
+        } else {
+            profileContext = "No specific profile selected. Suggest generally great date ideas.";
+        }
+
+        const prompt = `
+        Plan 4 distinct, creative, and specific date options for Zip Code: ${zipCode} on Date/Time: ${dateTime}.
+        
+        ${profileContext}
+        
+        Instructions:
+        - You act as a local expert. Suggest *specific* real venues, parks, restaurants, or activity centers known in or near ${zipCode}.
+        - If the specific zip code is small, look at the immediate surrounding area.
+        - Ensure the ideas fit the time of day (e.g., don't suggest a breakfast place for a 8 PM date).
+        - Provide a diverse range of options (e.g. one active, one dining, one cultural/relaxed).
+        
+        Return a JSON array of 4 objects.
+        `;
+
+        const schema = {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    title: { type: Type.STRING, description: "A catchy title for the date idea." },
+                    location: { type: Type.STRING, description: "The specific name of the venue or place." },
+                    description: { type: Type.STRING, description: "A tempting description of the activity." },
+                    reasoning: { type: Type.STRING, description: "Why this is a good fit based on the profile or time." }
+                },
+                required: ['title', 'location', 'description', 'reasoning']
+            }
+        };
+
+        const response = await gemini.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: schema
+            }
+        });
+
+        const jsonStr = response.text.trim();
+        return JSON.parse(jsonStr) as DateOption[];
+    } catch (error) {
+        console.error("Error generating structured date ideas:", error);
+        throw new Error("Failed to generate date options.");
+    }
+}
 
 export const generateGiftIdeas = async (profile: PersonProfile, userZip?: string): Promise<string> => {
     try {

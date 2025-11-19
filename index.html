@@ -7,17 +7,33 @@
     <meta name="theme-color" content="#1a1a2e" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wing Man</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
             colors: {
               'primary': '#1a1a2e',
               'secondary': '#16213e',
               'tertiary': '#0f3460',
               'accent': '#e94560',
             },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'bounce-slow': 'bounce 3s infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'scale(0.95)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
+              }
+            }
           },
         },
       }
@@ -30,13 +46,14 @@
     "react-dom/": "https://esm.sh/react-dom@18.2.0/",
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.1",
-    "react-markdown@9": "https://esm.sh/react-markdown@9"
+    "react-markdown@9": "https://esm.sh/react-markdown@9",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0"
   }
 }
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-primary text-white">
+  <body class="bg-primary text-white font-sans antialiased selection:bg-accent selection:text-white">
     <div id="root"></div>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Added data-type="module" to allow imports to work in the browser -->

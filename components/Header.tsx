@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { UserAccount } from '../types.ts';
+import { Menu, LogOut, User } from 'lucide-react';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -11,46 +12,47 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onLogout, toggleSidebar, userAccount, onOpenSettings }) => {
   return (
-    <header className="bg-tertiary shadow-md sticky top-0 z-10 flex-shrink-0">
+    <header className="bg-secondary/95 backdrop-blur-sm shadow-md sticky top-0 z-20 flex-shrink-0 border-b border-tertiary/50">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
         {/* Left side: Hamburger for mobile */}
         <div className="flex items-center">
            <button
             onClick={toggleSidebar}
-            className="lg:hidden text-gray-300 hover:text-white focus:outline-none"
+            className="lg:hidden text-gray-400 hover:text-white focus:outline-none p-2 rounded-md hover:bg-tertiary transition-colors"
             aria-label="Open sidebar"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <Menu size={24} />
           </button>
         </div>
 
         {/* Right side: User Menu */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button 
             onClick={onOpenSettings}
-            className="flex items-center gap-3 group focus:outline-none"
+            className="flex items-center gap-3 group focus:outline-none p-1 pr-3 rounded-full hover:bg-tertiary/50 transition-colors"
             aria-label="User Profile"
           >
+            {userAccount.avatarUrl ? (
+                 <img src={userAccount.avatarUrl} alt="Profile" className="w-8 h-8 rounded-full object-cover border-2 border-tertiary group-hover:border-accent transition-colors" />
+            ) : (
+                <div className="w-8 h-8 bg-tertiary rounded-full flex items-center justify-center font-bold text-white text-sm border-2 border-tertiary group-hover:border-accent group-hover:bg-accent transition-all">
+                   <User size={16} />
+                </div>
+            )}
             <span className="text-gray-300 text-sm font-medium hidden sm:block group-hover:text-white transition-colors">
               {userAccount.displayName || userAccount.username}
             </span>
-            {userAccount.avatarUrl ? (
-                 <img src={userAccount.avatarUrl} alt="Profile" className="w-9 h-9 rounded-full object-cover border border-transparent group-hover:border-accent transition-colors" />
-            ) : (
-                <div className="w-9 h-9 bg-accent rounded-full flex items-center justify-center font-bold text-white text-sm group-hover:bg-red-600 transition-colors">
-                  {(userAccount.displayName || userAccount.username).charAt(0).toUpperCase()}
-                </div>
-            )}
           </button>
-          <div className="h-6 w-px bg-gray-600 mx-1"></div>
+          
+          <div className="h-6 w-px bg-tertiary mx-1"></div>
+          
           <button
             onClick={onLogout}
-            className="text-gray-300 hover:text-white p-2 rounded-full transition-colors"
+            className="text-gray-400 hover:text-red-400 p-2 rounded-full hover:bg-tertiary transition-colors"
             aria-label="Logout"
+            title="Logout"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" /></svg>
+            <LogOut size={20} />
           </button>
         </div>
       </div>
